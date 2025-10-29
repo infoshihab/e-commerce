@@ -45,7 +45,7 @@ app.use(
   })
 );
 
-// Middleware
+// Middleware for JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -58,32 +58,21 @@ app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Serve Static Files (Uploads)
+// Serve Static Files for uploads (images, files, etc.)
 const __filename = fileURLToPath(import.meta.url); // Get the current filename
 const __dirname = path.dirname(__filename); // Get the current directory path
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Serve Admin Static Files
-// const adminPath = path.join(__dirname, "public", "admin");
-// app.use("/admin", express.static(adminPath));
+// Serve React frontend static files (built React app)
+const frontendBuildPath = path.join(__dirname, "../frontend/dist"); // Adjust this based on your folder structure
+app.use(express.static(frontendBuildPath));
 
-// // Fixing the issue with the wildcard route
-// app.get("/admin/*", (req, res) => {
-//   // The following line ensures that React Router handles the admin routes correctly
-//   res.sendFile(path.join(adminPath, "index.html"));
-// });
-
-// Serve Frontend Static Files (React App)
-const frontendPath = path.join(__dirname, "public", "frontend");
-app.use(express.static(frontendPath));
-
-// Catch-all route for React Router handling
+// Catch-all route for React Router to handle all frontend routes (this should be the last route)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
+  res.sendFile(path.join(frontendBuildPath, "index.html"));
 });
 
-// Default route for API health check
+// Default route for API health check (can be used to check if the backend is up)
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
