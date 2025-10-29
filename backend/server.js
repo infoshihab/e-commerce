@@ -4,11 +4,11 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Import your database connection and configurations
+// Import DB and Cloudinary configurations
 import connectDB from "./config/db.js";
 import "./config/cloudinary.js";
 
-// Import your routes
+// Import Routes
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productsRoutes.js";
@@ -20,18 +20,18 @@ import siteContentRoutes from "./routes/siteContentRoutes.js";
 // Load environment variables
 dotenv.config();
 
-// Connect to the database
+// Connect to DB
 connectDB();
 
+// Initialize the app
 const app = express();
 
-// Allowed origins for CORS
+// CORS configuration
 const allowedOrigins = [
   "https://e-commerce-43zn.onrender.com",
   "https://e-commercebackend-y002.onrender.com",
 ];
 
-// Configure CORS
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -45,16 +45,11 @@ app.use(
   })
 );
 
-// Middleware to parse incoming JSON and URL-encoded data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test API route to check if backend is working
-app.use("/api/test", (req, res) => {
-  res.json({ message: "Backend Works!" });
-});
-
-// API routes
+// API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
@@ -63,22 +58,29 @@ app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Handling static files (uploads)
+// Serve Static Files (Uploads)
 const __filename = fileURLToPath(import.meta.url); // Get the current filename
 const __dirname = path.dirname(__filename); // Get the current directory path
 
-// Serve static files (uploads) from the /uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Serve React build files
-app.use(express.static(path.join(__dirname, "frontend", "build"))); // Serve static React files from the build folder
-
-// Catch-all for React Router routes (should be after all API routes)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
+// Serve Admin Static Files
+const adminPath = path.join(__dirname, "public", "admin");
+app.use("/admin", express.static(adminPath));
+app.get("/admin/*", (req, res) => {
+  res.sendFile(path.join(adminPath, "index.html"));
 });
 
-// Default route for API
+// Serve Frontend Static Files (React App)
+const frontendPath = path.join(__dirname, "public", "frontend");
+app.use(express.static(frontendPath));
+
+// Catch-all route for React Router handling
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
+
+// Default route for API health check
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
