@@ -7,6 +7,7 @@ import "./config/cloudinary.js";
 
 import path from "path";
 
+import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productsRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
@@ -38,6 +39,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
+app.use("/api/admin", adminRoutes);
 
 const __dirname = path.resolve();
 

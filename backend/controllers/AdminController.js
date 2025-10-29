@@ -1,34 +1,31 @@
-// In your AdminController.js or equivalent file
-import Order from "../models/OrderModel.js";
+import Order from "../models/OrderModel.js"; // assuming you have an Order model
 
-// Fetch Order Stats for the dashboard
-const getDashboardStats = async (req, res) => {
+export const getDashboardStats = async (req, res) => {
   try {
-    // Fetching stats from the database
-    const newOrders = await Order.countDocuments({ status: "new" });
-    const pendingOrders = await Order.countDocuments({ status: "pending" });
-    const shippedOrders = await Order.countDocuments({ status: "shipped" });
-    const deliveredOrders = await Order.countDocuments({ status: "delivered" });
-
-    // Sum revenue only for paid orders
+    const newOrders = await Order.countDocuments({ orderStatus: "new" });
+    const pendingOrders = await Order.countDocuments({
+      orderStatus: "pending",
+    });
+    const shippedOrders = await Order.countDocuments({
+      orderStatus: "shipped",
+    });
+    const deliveredOrders = await Order.countDocuments({
+      orderStatus: "delivered",
+    });
     const revenue = await Order.aggregate([
-      { $match: { paymentStatus: "paid" } },
-      { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" } } },
+      { $match: { orderStatus: "delivered" } },
+      { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    const stats = {
+    res.json({
       newOrders,
       pendingOrders,
       shippedOrders,
       deliveredOrders,
-      revenue: revenue.length > 0 ? revenue[0].totalRevenue : 0,
-    };
-
-    res.json(stats);
-  } catch (err) {
-    console.error("Error fetching dashboard stats:", err);
-    res.status(500).json({ error: "Error fetching stats" });
+      revenue: revenue[0]?.total || 0,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    res.status(500).json({ message: "Error fetching stats" });
   }
 };
-
-export { getDashboardStats };
