@@ -65,14 +65,14 @@ const __dirname = path.dirname(__filename); // Get the current directory path
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Serve Admin Static Files
-const adminPath = path.join(__dirname, "public", "admin");
-app.use("/admin", express.static(adminPath));
+// const adminPath = path.join(__dirname, "public", "admin");
+// app.use("/admin", express.static(adminPath));
 
-// Fixing the issue with the wildcard route
-app.get("/admin/*", (req, res) => {
-  // The following line ensures that React Router handles the admin routes correctly
-  res.sendFile(path.join(adminPath, "index.html"));
-});
+// // Fixing the issue with the wildcard route
+// app.get("/admin/*", (req, res) => {
+//   // The following line ensures that React Router handles the admin routes correctly
+//   res.sendFile(path.join(adminPath, "index.html"));
+// });
 
 // Serve Frontend Static Files (React App)
 const frontendPath = path.join(__dirname, "public", "frontend");
