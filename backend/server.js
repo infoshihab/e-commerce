@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 
-// Import Routes
+import connectDB from "./config/db.js";
+import "./config/cloudinary.js";
+
+import path from "path";
+
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productsRoutes.js";
@@ -13,18 +15,12 @@ import orderRoutes from "./routes/orderRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import siteContentRoutes from "./routes/siteContentRoutes.js";
 
-// Load environment variables
 dotenv.config();
-
-// Connect to DB
-import connectDB from "./config/db.js";
 connectDB();
 
-// Initialize the app
 const app = express();
-
-// CORS configuration
 const allowedOrigins = [
+  // "https://e-commerce-kappa-hazel-37.vercel.app/",
   "https://e-commerce-43zn.onrender.com",
   "https://e-commercebackend-y002.onrender.com",
 ];
@@ -42,11 +38,21 @@ app.use(
   })
 );
 
-// Middleware for JSON and URL-encoded data
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // Allow frontend domain
+//     credentials: true, // If you're using cookies or sessions, keep this
+//   })
+// );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API Routes
+app.use("/api/test", (req, res) => {
+  res.json({ message: " Backend Works!" });
+});
+
+//Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
@@ -55,35 +61,21 @@ app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Fix for __dirname in ES modules (manually define __dirname equivalent)
-const __filename = fileURLToPath(import.meta.url); // Get the current filename
-const __dirname = path.dirname(__filename); // Get the current directory path
+const __dirname = path.resolve();
 
-// Serve Static Files (uploads)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
-// Serve React frontend static files (from public/build folder)
-const frontendPath = path.join(__dirname, "public", "build");
-app.use(express.static(frontendPath));
-
-// Catch-all route for React Router to handle all frontend routes (this should be the last route)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
-});
-
-// Default route for API health check
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("Api is running...");
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.log(err.stack);
   res.status(500).json({ message: "Server Error" });
 });
 
-// Start the server
-const port = process.env.PORT || 5000; // Default to 5000 if no PORT is set
+const port = process.env.PORT;
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
