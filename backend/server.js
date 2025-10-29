@@ -20,9 +20,9 @@ connectDB();
 
 const app = express();
 const allowedOrigins = [
-  "https://e-commerce-kappa-hazel-37.vercel.app/",
-  // "https://e-commerce-43zn.onrender.com",
-  // "https://e-commercebackend-y002.onrender.com",
+  // "https://e-commerce-kappa-hazel-37.vercel.app/",
+  "https://e-commerce-43zn.onrender.com",
+  "https://e-commercebackend-y002.onrender.com",
 ];
 
 app.use(
@@ -74,8 +74,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Server Error" });
 });
 
-// const port = process.env.PORT;
+const port = process.env.PORT;
 
-// app.listen(port, () => {
-//   console.log(`Server running on port ${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
