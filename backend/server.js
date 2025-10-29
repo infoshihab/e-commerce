@@ -19,12 +19,24 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const allowedOrigins = [
+  "https://e-commerce-43zn.onrender.com", // your frontend
+  "https://e-commercebackend-y002.onrender.com", // backend itself (optional)
+];
+
 app.use(
   cors({
-    origin: "https://e-commercebackend-y002.onrender.com", // your frontend origin
-    credentials: true,
+    origin: function (origin, callback) {
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // If you're using cookies or sessions, keep this
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
