@@ -20,8 +20,9 @@ connectDB();
 
 const app = express();
 const allowedOrigins = [
-  "https://e-commerce-43zn.onrender.com", // your frontend
-  "https://e-commercebackend-y002.onrender.com", // backend itself (optional)
+  "https://e-commerce-kappa-hazel-37.vercel.app/",
+  // "https://e-commerce-43zn.onrender.com",
+  // "https://e-commercebackend-y002.onrender.com",
 ];
 
 app.use(
@@ -36,6 +37,13 @@ app.use(
     credentials: true, // If you're using cookies or sessions, keep this
   })
 );
+
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // Allow frontend domain
+//     credentials: true, // If you're using cookies or sessions, keep this
+//   })
+// );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

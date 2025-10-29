@@ -1,4 +1,5 @@
-// src/context/AppContext.jsx
+// AppContext.jsx
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
@@ -77,7 +78,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        await Promise.all([fetchSiteContent(), fetchProducts(), fetchOrders()]);
+        await Promise.all([fetchSiteContent(), fetchProducts()]);
       } catch {}
 
       if (!initialToken) {
@@ -103,23 +104,18 @@ export const AppProvider = ({ children }) => {
 
   // Fetch orders for the logged-in user
   const fetchOrders = async () => {
-    if (!user) return; // Skip if user is not logged in
-
     setOrdersLoading(true);
     try {
       const { data } = await axios.get(`${API}/orders/myorders`);
       if (Array.isArray(data)) {
-        setOrders(data); // Ensure orders are set as an array
+        setOrders(data);
       } else {
-        console.error("Expected array, but got:", data);
-        setOrders([]); // In case the response is not as expected
+        console.error("Expected array but received:", data);
+        setOrders([]); // In case of invalid response
       }
     } catch (err) {
-      console.error(
-        "Error fetching orders:",
-        err?.response?.data || err.message
-      );
-      setOrders([]); // Set orders to empty if there's an error
+      console.error("Error fetching orders:", err);
+      setOrders([]); // Set empty orders on error
     } finally {
       setOrdersLoading(false);
     }
@@ -252,34 +248,24 @@ export const AppProvider = ({ children }) => {
   };
 
   const fetchCart = async () => {
+    if (cartLoading) return; // Avoid duplicate fetches while loading
     setCartLoading(true);
     try {
-      if (!user) {
-        const guest = readGuestCart();
-        const detailed = await Promise.all(guest.map(ensureCartItemDetails));
-        setCart(detailed);
-        return detailed;
-      }
-
       const { data } = await axios.get(`${API}/cart`);
-      const detailed = await Promise.all(data.map(ensureCartItemDetails));
-      setCart(detailed);
-      return detailed;
+      const detailedCart = await Promise.all(data.map(ensureCartItemDetails));
+      setCart(detailedCart);
     } catch (err) {
       console.error("fetchCart:", err?.response?.data || err.message);
-      return [];
     } finally {
       setCartLoading(false);
     }
   };
 
   const addToCart = async (productId, qty = 1) => {
-    // Guest flow (localStorage)
     if (!user) {
       let guestCart = readGuestCart();
       const idx = guestCart.findIndex((i) => i.product === productId);
 
-      // fetch product data for details
       let product;
       try {
         const res = await axios.get(`${API}/products/${productId}`);
@@ -313,7 +299,6 @@ export const AppProvider = ({ children }) => {
       return { success: true, guest: true, cart: guestCart };
     }
 
-    // Logged-in user flow: ensure we explicitly pass token header
     try {
       const headers = {};
       if (token) headers.Authorization = `Bearer ${token}`;
@@ -324,21 +309,18 @@ export const AppProvider = ({ children }) => {
         { headers }
       );
 
-      // data should be detailed cart array from server
       const detailed = Array.isArray(data)
         ? await Promise.all(data.map(ensureCartItemDetails))
-        : await fetchCart(); // fallback
+        : await fetchCart();
 
       setCart(detailed);
       setIsCartOpen(true);
       return { success: true, cart: detailed };
     } catch (err) {
       console.error("addToCart error:", err);
-      console.error("response data:", err?.response?.data);
       return {
         success: false,
         message: err?.response?.data?.message || err.message,
-        debug: err?.response?.data,
       };
     }
   };
@@ -387,24 +369,27 @@ export const AppProvider = ({ children }) => {
 
   // placeOrder: posts an order and clears cart on success
   const placeOrder = async (shippingAddress, paymentMethod = "COD") => {
-    // require login
     if (!user) {
       return { success: false, message: "Login required" };
     }
 
     try {
-      // build body
       const body = {
         shippingAddress,
         paymentMethod,
-        items: cart.map((c) => ({ product: c.product, qty: c.qty })),
+        items: cart.map((c) => ({
+          product: c.product,
+          name: c.name,
+          qty: c.qty,
+          image: c.image,
+          price: c.price,
+        })),
       };
 
       const { data } = await axios.post(`${API}/orders`, body);
 
-      // clear cart locally after successful order
-      setCart([]);
-      saveGuestCart([]);
+      setCart([]); // Clear cart on success
+      saveGuestCart([]); // Clear guest cart
 
       return { success: true, order: data };
     } catch (err) {
@@ -492,6 +477,7 @@ export const AppProvider = ({ children }) => {
     adminUpdateSiteContent,
     adminDeleteBanner,
     placeOrder,
+    fetchOrders,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

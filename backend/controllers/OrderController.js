@@ -3,7 +3,34 @@ import User from "../models/UserModel.js";
 
 // Place order
 const placeOrder = async (req, res) => {
-  // Same logic as before
+  try {
+    const { shippingAddress, paymentMethod, items } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "No items in the order" });
+    }
+
+    // Create an order with the received data
+    const order = await Order.create({
+      user: req.user._id, // Ensure we use the user's _id from the request
+      orderItems: items.map((item) => ({
+        name: item.name,
+        qty: item.qty,
+        image: item.image,
+        price: item.price,
+        product: item.product, // reference to product ID
+      })),
+      shippingAddress,
+      paymentMethod,
+      status: "pending",
+      totalPrice: items.reduce((acc, item) => acc + item.price * item.qty, 0), // Calculate total price
+    });
+
+    res.status(201).json(order); // Respond with the created order
+  } catch (error) {
+    console.error("Place order error:", error);
+    res.status(500).json({ message: "Failed to place order" });
+  }
 };
 
 // Get my orders (user-specific)
