@@ -27,7 +27,6 @@ const app = express();
 
 // Allowed origins for CORS
 const allowedOrigins = [
-  // "https://e-commerce-kappa-hazel-37.vercel.app/",
   "https://e-commerce-43zn.onrender.com",
   "https://e-commercebackend-y002.onrender.com",
 ];
@@ -74,7 +73,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Serve React build files
 app.use(express.static(path.join(__dirname, "frontend", "build"))); // Serve static React files from the build folder
 
-// Catch-all for React Router routes
+// Catch-all for React Router routes (should be after all API routes)
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
