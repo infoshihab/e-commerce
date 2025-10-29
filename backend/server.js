@@ -2,11 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import { fileURLToPath } from "url";
-
-// Import DB and Cloudinary configurations
-import connectDB from "./config/db.js";
-import "./config/cloudinary.js";
 
 // Import Routes
 import adminRoutes from "./routes/adminRoutes.js";
@@ -19,9 +14,6 @@ import siteContentRoutes from "./routes/siteContentRoutes.js";
 
 // Load environment variables
 dotenv.config();
-
-// Connect to DB
-connectDB();
 
 // Initialize the app
 const app = express();
@@ -58,21 +50,16 @@ app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Serve Static Files for uploads (images, files, etc.)
-const __filename = fileURLToPath(import.meta.url); // Get the current filename
-const __dirname = path.dirname(__filename); // Get the current directory path
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Serve React frontend static files (built React app)
-const frontendBuildPath = path.join(__dirname, "../frontend/dist"); // Adjust this based on your folder structure
-app.use(express.static(frontendBuildPath));
+// Serve React frontend static files (from public/build folder)
+const frontendPath = path.join(__dirname, "public", "build");
+app.use(express.static(frontendPath));
 
 // Catch-all route for React Router to handle all frontend routes (this should be the last route)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendBuildPath, "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Default route for API health check (can be used to check if the backend is up)
+// Default route for API health check
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
