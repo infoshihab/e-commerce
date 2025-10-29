@@ -67,6 +67,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Serve Admin Static Files
 const adminPath = path.join(__dirname, "public", "admin");
 app.use("/admin", express.static(adminPath));
+
+// Update the handling of `/admin/*` to this:
 app.get("/admin/*", (req, res) => {
   res.sendFile(path.join(adminPath, "index.html"));
 });
