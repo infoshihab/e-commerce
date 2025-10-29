@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 
 // Import Routes
 import adminRoutes from "./routes/adminRoutes.js";
@@ -14,6 +15,10 @@ import siteContentRoutes from "./routes/siteContentRoutes.js";
 
 // Load environment variables
 dotenv.config();
+
+// Connect to DB
+import connectDB from "./config/db.js";
+connectDB();
 
 // Initialize the app
 const app = express();
@@ -49,6 +54,13 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
+
+// Fix for __dirname in ES modules (manually define __dirname equivalent)
+const __filename = fileURLToPath(import.meta.url); // Get the current filename
+const __dirname = path.dirname(__filename); // Get the current directory path
+
+// Serve Static Files (uploads)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Serve React frontend static files (from public/build folder)
 const frontendPath = path.join(__dirname, "public", "build");
