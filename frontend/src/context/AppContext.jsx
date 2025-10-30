@@ -91,7 +91,9 @@ export const AppProvider = ({ children }) => {
         const profile = res.data?.user ?? res.data;
         setUser(profile);
         if (profile) localStorage.setItem(USER_KEY, JSON.stringify(profile));
-        await fetchCart();
+        // if (initialToken) {
+        //   await fetchCart();
+        // }
       } catch (err) {
         const status = err?.response?.status;
         if (status === 401 || status === 403) logout(true);
@@ -140,16 +142,40 @@ export const AppProvider = ({ children }) => {
     setProductsLoading(true);
     try {
       const { data } = await axios.get(`${API}/products`);
-      setProducts(Array.isArray(data) ? data : data.products || []);
+      // Log to debug the structure of the data
+      console.log("Fetched products:", data);
+
+      if (Array.isArray(data)) {
+        setProducts(data); // Set the data if it's an array
+      } else {
+        setProducts(data.products || []); // If data has `products` key
+      }
       return data;
     } catch (err) {
       console.error("fetchProducts:", err?.response?.data || err.message);
+      setProducts([]); // Ensure it's always an array
       return [];
     } finally {
       setProductsLoading(false);
     }
   };
-
+  const fetchCart = async () => {
+    // if (cartLoading) return; // Avoid duplicate fetches while loading
+    setCartLoading(true);
+    try {
+      const { data } = await axios.get(`${API}/cart`);
+      // const detailedCart = await Promise.all(data.map(ensureCartItemDetails));
+      if (Array.isArray(data)) {
+        setCart(detailedCart);
+      } else {
+        setCart([]);
+      }
+    } catch (err) {
+      console.error("fetchCart:", err?.response?.data || err.message);
+    } finally {
+      setCartLoading(false);
+    }
+  };
   // AUTH
   const login = async (email, password) => {
     try {
@@ -244,20 +270,6 @@ export const AppProvider = ({ children }) => {
         price: 0,
         image: "/placeholder.png",
       };
-    }
-  };
-
-  const fetchCart = async () => {
-    if (cartLoading) return; // Avoid duplicate fetches while loading
-    setCartLoading(true);
-    try {
-      const { data } = await axios.get(`${API}/cart`);
-      const detailedCart = await Promise.all(data.map(ensureCartItemDetails));
-      setCart(detailedCart);
-    } catch (err) {
-      console.error("fetchCart:", err?.response?.data || err.message);
-    } finally {
-      setCartLoading(false);
     }
   };
 
