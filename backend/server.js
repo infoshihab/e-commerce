@@ -1,10 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
 import connectDB from "./config/db.js";
 import "./config/cloudinary.js";
-
 import path from "path";
 
 import adminRoutes from "./routes/adminRoutes.js";
@@ -19,40 +17,27 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const allowedOrigins = [
-  // "https://e-commerce-kappa-hazel-37.vercel.app/",
-  "https://e-commerce-43zn.onrender.com",
-  "https://e-commercebackend-y002.onrender.com",
-];
+const _dirname = path.resolve();
 
+// CORS setup (Frontend domain)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // If you're using cookies or sessions, keep this
+    origin: "http://localhost:5173" || "https://e-commerce-43zn.onrender.com/", // Allow frontend domain
+    credentials: true,
   })
 );
-
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", // Allow frontend domain
-//     credentials: true, // If you're using cookies or sessions, keep this
-//   })
-// );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Wildcard route to serve index.html for frontend
+
+// Test route
 app.use("/api/test", (req, res) => {
-  res.json({ message: " Backend Works!" });
+  res.json({ message: "Backend Works!" });
 });
 
-//Routes
+// API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
@@ -61,21 +46,27 @@ app.use("/api/site-content", siteContentRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 
-const __dirname = path.resolve();
+// Serve frontend after all routes
+app.use(express.static(path.join(_dirname, "/frontend/dist")));
+app.get("/{*any}", (req, res) => {
+  res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
+});
+// Static file serving for uploads
+app.use("/uploads", express.static(path.join(_dirname, "/uploads")));
 
-app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
-
+// Basic health check route
 app.get("/", (req, res) => {
   res.send("Api is running...");
 });
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.log(err.stack);
   res.status(500).json({ message: "Server Error" });
 });
 
-const port = process.env.PORT;
-
+// Start the server
+const port = process.env.PORT || 8000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

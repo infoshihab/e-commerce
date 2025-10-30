@@ -72,7 +72,7 @@ const CategoryAdmin = () => {
   const handleDeleteCategory = async (id) => {
     if (!window.confirm("Are you sure to delete this category?")) return;
     try {
-      await axios.delete(`${API}/category/${id}`, {
+      await axios.delete(`${API}/categories/${id}`, {
         headers: getAuthHeaders(),
       });
       setCategories((prev) => prev.filter((c) => c._id !== id));
