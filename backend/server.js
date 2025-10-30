@@ -22,7 +22,7 @@ const _dirname = path.resolve();
 // CORS setup (Frontend domain)
 app.use(
   cors({
-    origin: "http://localhost:5173" || "https://e-commerce-43zn.onrender.com/", // Allow frontend domain
+    origin: "https://e-commerce-43zn.onrender.com", // Allow frontend domain
     credentials: true,
   })
 );
