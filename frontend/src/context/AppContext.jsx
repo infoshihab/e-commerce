@@ -164,7 +164,7 @@ export const AppProvider = ({ children }) => {
     setCartLoading(true);
     try {
       const { data } = await axios.get(`${API}/cart`);
-      // const detailedCart = await Promise.all(data.map(ensureCartItemDetails));
+      const detailedCart = await Promise.all(data.map(ensureCartItemDetails));
       if (Array.isArray(data)) {
         setCart(detailedCart);
       } else {
