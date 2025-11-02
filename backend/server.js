@@ -20,33 +20,33 @@ const app = express();
 const _dirname = path.resolve();
 
 // CORS setup (Frontend domain)
-app.use(
-  cors({
-    origin: "https://e-commerce-43zn.onrender.com", // Allow frontend domain
-    credentials: true,
-  })
-);
-
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   "https://e-commercebackend-y002.onrender.com",
-//   "https://e-commerce-43zn.onrender.com",
-// ];
-
 // app.use(
 //   cors({
-//     origin: function (origin, callback) {
-//       if (!origin) return callback(null, true);
-//       if (allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       } else {
-//         console.log("Blocked by CORS:", origin);
-//         return callback(new Error("Not allowed by CORS"));
-//       }
-//     },
+//     origin: "https://e-commerce-43zn.onrender.com", // Allow frontend domain
 //     credentials: true,
 //   })
 // );
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://e-commercebackend-y002.onrender.com",
+  "https://e-commerce-43zn.onrender.com",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.log("Blocked by CORS:", origin);
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
