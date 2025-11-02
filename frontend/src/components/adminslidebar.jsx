@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaBox,
@@ -7,8 +7,17 @@ import {
   FaTags,
   FaSignOutAlt,
 } from "react-icons/fa"; // Add relevant icons
+import { useAppContext } from "../context/AppContext";
 
 const AdminSidebar = ({ setActiveSection }) => {
+  const { logout } = useAppContext();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="w-64 bg-orange-500 text-white fixed top-0 left-0 h-full p-6 flex flex-col">
       <h2 className="text-3xl font-semibold mb-8 text-center">Admin Panel</h2>
@@ -45,12 +54,12 @@ const AdminSidebar = ({ setActiveSection }) => {
           <FaTags className="mr-3" /> Categories
         </Link>
 
-        <Link
-          to="/admin/logout"
+        <button
+          onClick={handleLogout}
           className="flex items-center p-3 rounded-md hover:bg-orange-600"
         >
           <FaSignOutAlt className="mr-3" /> Logout
-        </Link>
+        </button>
       </nav>
     </div>
   );
